@@ -1,15 +1,6 @@
 #include "matrix.h"
 
 
-void showMatrix(matrix *m){
-	for(int i = 0; i < m->rows; ++i){
-		for(int j = 0; j < m->cols; ++j){
-			printf("%.1f\t", m->data[i][j]);
-		}
-		printf("\n");
-	}
-}
-
 matrix *newMatrix(int rows, int cols){
 	matrix *m = malloc(sizeof(matrix));
 	m->rows = rows;
