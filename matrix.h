@@ -2,6 +2,10 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
 
 typedef struct matrix{
 	int rows;

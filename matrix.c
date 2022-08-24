@@ -1,7 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
 #include "matrix.h"
+
 
 void showMatrix(matrix *m){
 	for(int i = 0; i < m->rows; ++i){
