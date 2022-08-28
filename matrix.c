@@ -5,9 +5,9 @@ matrix *newMatrix(int rows, int cols){
 	matrix *m = malloc(sizeof(matrix));
 	m->rows = rows;
 	m->cols = cols;
-	m->data = malloc(rows*sizeof(double*));
+	m->data = malloc(rows*sizeof(long double*));
 	for(int i = 0; i < rows; ++i){
-		m->data[i] = malloc(cols*sizeof(double));
+		m->data[i] = malloc(cols*sizeof(long double));
 	}
 	return m;
 }
@@ -43,7 +43,7 @@ matrix *identityMatrix(int order){
 	return im;
 }
 
-matrix *fillMatrix(matrix *m, double n){
+matrix *fillMatrix(matrix *m, long double n){
 	matrix *r = newMatrix(m->rows, m->cols);
 	for(int i = 0; i < r->rows; ++i){
 		for(int j = 0; j < r->cols; ++j){
@@ -53,7 +53,7 @@ matrix *fillMatrix(matrix *m, double n){
 	return r;
 }
 
-matrix *addMatrix(matrix *m, double n){
+matrix *addMatrix(matrix *m, long double n){
 	for(int i = 0; i < m->rows; ++i){
 		for(int j = 0; j < m->cols; ++j){
 			m->data[i][j] += n;
@@ -61,11 +61,11 @@ matrix *addMatrix(matrix *m, double n){
 	}
 }
 
-matrix *subtractMatrix(matrix *m, double n){
+matrix *subtractMatrix(matrix *m, long double n){
 	return addMatrix(m, -n);
 }
 
-matrix *scaleMatrix(matrix *m, double n){
+matrix *multiplyMatrix(matrix *m, long double n){
 	matrix *r = copyMatrix(m);
 	for(int i = 0; i < r->rows; ++i){
 		for(int j = 0; j < r->cols; ++j){
@@ -94,7 +94,7 @@ matrix *addMatrices(matrix *m1, matrix *m2){
 }
 
 matrix *subtractMatrices(matrix *m1, matrix *m2){
-	m2 = scaleMatrix(m2, (double)-1);
+	m2 = multiplyMatrix(m2, (long double)-1);
 	return addMatrices(m1, m2);
 }
 
@@ -106,7 +106,7 @@ matrix *multiplyMatrices(matrix *m1, matrix *m2){
 	matrix *r = newMatrix(m1->rows, m2->cols);
 	for(int i = 0; i < r->rows; ++i){
 		for(int j = 0; j < r->cols; ++j){
-			double sum = 0;
+			long double sum = 0;
 			for(int n = 0; n < m1->cols; ++n){
 				sum += m1->data[i][n] * m2->data[n][j];
 			}
@@ -136,18 +136,18 @@ matrix *subMatrix(matrix *m, int row, int col){
 	return r;
 }
 
-double determinant(matrix *m){
+long double determinant(matrix *m){
 	if(!isSquare(m)){
 		fprintf(stderr, "Matrix is not square (%dx%d)\n", m->rows, m->cols);
 		exit(EXIT_FAILURE);
 	}
-	double d = 0;
+	long double d = 0;
 	if(m->rows == 1){
 		return m->data[0][0];
 	}else{
 		for(int i = 0; i < m->rows; ++i){
 			matrix *s = subMatrix(m, 0, i);
-			double v = determinant(s)*m->data[0][i];
+			long double v = determinant(s)*m->data[0][i];
 			d += !(i%2) ? v : -v;
 		}
 		return d;
@@ -162,7 +162,7 @@ matrix *cofactor(matrix *m){
 	matrix *r = newMatrix(m->rows, m->cols);
 	for(int i = 0; i < r->rows; ++i){
 		for(int j = 0; j < r->cols; ++j){
-			double v = determinant(subMatrix(m, i, j));
+			long double v = determinant(subMatrix(m, i, j));
 			r->data[i][j] = !((i+j)%2) ? v : -v;
 		}
 	}
@@ -184,12 +184,12 @@ matrix *adjugate(matrix *m){
 }
 
 matrix *inverse(matrix *m){
-	double d = determinant(m);
+	long double d = determinant(m);
 	if(d == 0){
 		fprintf(stderr, "Determinant is 0, the matrix is not invertible\n");
 		return NULL;
 	}
-	return scaleMatrix(adjugate(m), 1/d);
+	return multiplyMatrix(adjugate(m), 1/d);
 }
 
 matrix *raiseMatrix(matrix *m, int n){
@@ -207,3 +207,19 @@ matrix *raiseMatrix(matrix *m, int n){
 	}
 	return r;
 }
+
+/*int main(){
+
+	int input = 784, hidden = 300, output = 10;
+	
+	matrix *input_matrix = newMatrix(input, 1); input_matrix = fillMatrix(input_matrix, 1);
+	matrix *hidden_weights = newMatrix(hidden, input); hidden_weights = fillMatrix(hidden_weights, 1);
+	matrix *output_weights = newMatrix(output, hidden); output_weights = fillMatrix(output_weights, 1);
+	
+	matrix *hidden_inputs = multiplyMatrices(hidden_weights, input_matrix);
+	matrix *final_inputs = multiplyMatrices(output_weights, hidden_inputs);
+	
+	printf("done\n");
+
+	return 0;
+}*/
