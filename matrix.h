@@ -37,6 +37,8 @@ matrix *subtractMatrices(matrix *m1, matrix *m2);
 
 matrix *multiplyMatrices(matrix *m1, matrix *m2);
 
+matrix HadamardProduct(matrix *m1, matrix *m2);
+
 matrix *subMatrix(matrix *m, int row, int col);
 
 long double determinant(matrix *m);
@@ -44,6 +46,8 @@ long double determinant(matrix *m);
 matrix *cofactor(matrix *m);
 
 matrix *transpose(matrix *m);
+
+matrix *dotProduct(matrix *m1, matrix *m2);
 
 matrix *adjugate(matrix *m);
 

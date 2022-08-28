@@ -116,6 +116,20 @@ matrix *multiplyMatrices(matrix *m1, matrix *m2){
 	return r; 
 }
 
+matrix *HadamardProduct(matrix *m1, matrix *m2){
+	if(!sameDimensions(m1, m2)){
+		fprintf(stderr, "Wrong dimensions (%dx%d != %dx%d)\n", m1->rows, m1->cols, m2->rows, m2->cols);
+		return NULL;
+	}
+	matrix *r = newMatrix(m1->rows, m1->cols);
+	for(int i = 0; i < r->rows; ++i){
+		for(int j = 0; j < r->cols; ++j){
+			r->data[i][j] = m1->data[i][j] * m2->data[i][j];
+		}
+	}
+	return r;
+}
+
 static inline bool isSquare(matrix *m){
 	return m->rows == m->cols;
 }
@@ -179,6 +193,10 @@ matrix *transpose(matrix *m){
 	return r;
 }
 
+matrix *dotProduct(matrix *m1, matrix *m2){
+	return multiplyMatrices(m1, transpose(m2));
+}
+
 matrix *adjugate(matrix *m){
 	return transpose(cofactor(m));
 }
@@ -207,6 +225,7 @@ matrix *raiseMatrix(matrix *m, int n){
 	}
 	return r;
 }
+
 
 /*int main(){
 
