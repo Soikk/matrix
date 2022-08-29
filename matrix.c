@@ -239,6 +239,21 @@ matrix *raiseMatrix(matrix *m, int n){
 	matrix *final_inputs = multiplyMatrices(output_weights, hidden_inputs);
 	
 	printf("done\n");
+	
+	matrix *in = newMatrix(1, 2); in->data[0][0] = 0; in->data[0][1] = 1;
+	matrix *layer = newMatrix(1, 2); layer->data[0][0] = 0.188; layer->data[0][1] = 0.812;
+	matrix *layerm = newMatrix(1, 2); layerm->data[0][0] = 0.812; layerm->data[0][1] = 0.188;
+	
+	matrix *diff = subtractMatrices(in, layer);
+	matrix *der = HadamardProduct(layer, layerm);
+	matrix *res = HadamardProduct(diff, der);
+	
+	for(int i = 0; i < res->rows; ++i){
+		for(int j = 0; j < res->cols; ++j){
+			printf("%.3Lf\t", res->data[i][j]);
+		}
+		printf("\n");
+	}
 
 	return 0;
 }*/

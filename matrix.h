@@ -37,7 +37,7 @@ matrix *subtractMatrices(matrix *m1, matrix *m2);
 
 matrix *multiplyMatrices(matrix *m1, matrix *m2);
 
-matrix HadamardProduct(matrix *m1, matrix *m2);
+matrix *HadamardProduct(matrix *m1, matrix *m2);
 
 matrix *subMatrix(matrix *m, int row, int col);
 
