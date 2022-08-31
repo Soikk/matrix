@@ -33,7 +33,7 @@ static inline bool isSquare(matrix *m){
 
 void copyMatrix(matrix *dest, matrix *src){
 	if(!sameDimensions(dest, src)){
-		fprintf(stderr, "Wrong dimensions (%dx%d != %dx%d)\n", a->rows, a->cols, b->rows, b->cols);
+		fprintf(stderr, "Wrong dimensions (%dx%d != %dx%d)\n", dest->rows, dest->cols, src->rows, src->cols);
 		return;
 	}
 	for(int i = 0; i < src->rows; ++i){
@@ -179,7 +179,7 @@ long double determinant(matrix *m){
 void cofactor(matrix *m){
 	if(!isSquare(m)){
 		fprintf(stderr, "Matrix is not square (%dx%d)\n", m->rows, m->cols);
-		return NULL;
+		return;
 	}
 	matrix *r = newMatrix(m->rows, m->cols);
 	for(int i = 0; i < r->rows; ++i){
@@ -213,7 +213,7 @@ matrix *dotProduct(matrix *a, matrix *b){
 
 void adjugate(matrix *m){
 	cofactor(m);
-	matrix *t = transpose(cm);
+	matrix *t = transpose(m);
 	copyMatrix(m, t);
 	freeMatrix(&t);
 }
