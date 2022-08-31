@@ -54,11 +54,13 @@ matrix *fillMatrix(matrix *m, long double n){
 }
 
 matrix *addMatrix(matrix *m, long double n){
-	for(int i = 0; i < m->rows; ++i){
-		for(int j = 0; j < m->cols; ++j){
-			m->data[i][j] += n;
+	matrix *r = newMatrix(m->cols, m->rows);
+	for(int i = 0; i < r->rows; ++i){
+		for(int j = 0; j < r->cols; ++j){
+			r->data[i][j] = m->data[i][j] + n;
 		}
 	}
+	return r;
 }
 
 matrix *subtractMatrix(matrix *m, long double n){
