@@ -19,25 +19,27 @@ matrix *newMatrix(int rows, int cols);
 
 void freeMatrix(matrix **m);
 
-matrix *copyMatrix(matrix *m);
+void copyMatrix(matrix *dest, matrix *src);
+
+matrix *cloneMatrix(matrix *m);
 
 matrix *identityMatrix(int order);
 
-matrix *fillMatrix(matrix *m, long double n);
+void fillMatrix(matrix *m, long double n);
 
-matrix *addMatrix(matrix *m, long double n);
+void addMatrix(matrix *m, long double n);
 
-matrix *subtractMatrix(matrix *m, long double n);
+void subtractMatrix(matrix *m, long double n);
 
-matrix *multiplyMatrix(matrix *m, long double n);
+void multiplyMatrix(matrix *m, long double n);
 
-matrix *addMatrices(matrix *m1, matrix *m2);
+matrix *addMatrices(matrix *a, matrix *b);
 
-matrix *subtractMatrices(matrix *m1, matrix *m2);
+matrix *subtractMatrices(matrix *a, matrix *b);
 
-matrix *multiplyMatrices(matrix *m1, matrix *m2);
+matrix *multiplyMatrices(matrix *a, matrix *b);
 
-matrix *HadamardProduct(matrix *m1, matrix *m2);
+matrix *HadamardProduct(matrix *a, matrix *b);
 
 matrix *subMatrix(matrix *m, int row, int col);
 
@@ -47,12 +49,12 @@ matrix *cofactor(matrix *m);
 
 matrix *transpose(matrix *m);
 
-matrix *dotProduct(matrix *m1, matrix *m2);
+matrix *dotProduct(matrix *a, matrix *b);
 
 matrix *adjugate(matrix *m);
 
-matrix *inverse(matrix *m);
+void invert(matrix *m);
 
-matrix *raiseMatrix(matrix *m, int n);
+void raiseMatrix(matrix *m, int n);
 
 #endif

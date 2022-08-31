@@ -1,6 +1,6 @@
 #include "matrix.h"
 
-
+static int global = 0;
 matrix *newMatrix(int rows, int cols){
 	matrix *m = malloc(sizeof(matrix));
 	m->rows = rows;
@@ -23,14 +23,30 @@ void freeMatrix(matrix **m){
 	*m = NULL;
 }
 
-matrix *copyMatrix(matrix *m){
-	matrix *c = newMatrix(m->rows, m->cols);
-	for(int i = 0; i < m->rows; ++i){
-		for(int j = 0; j < m->cols; ++j){
-			c->data[i][j] = m->data[i][j];
+static inline bool sameDimensions(matrix *a, matrix *b){
+	return (a->rows == b->rows) && (a->cols == b->cols);
+}
+
+static inline bool isSquare(matrix *m){
+	return m->rows == m->cols;
+}
+
+void copyMatrix(matrix *dest, matrix *src){
+	if(!sameDimensions(dest, src)){
+		fprintf(stderr, "Wrong dimensions (%dx%d != %dx%d)\n", a->rows, a->cols, b->rows, b->cols);
+		return;
+	}
+	for(int i = 0; i < src->rows; ++i){
+		for(int j = 0; j < src->cols; ++j){
+			dest->data[i][j] = src->data[i][j];
 		}
 	}
-	return c;
+}
+
+matrix *cloneMatrix(matrix *m){
+	matrix *r = newMatrix(m->rows, m->cols);
+	copyMatrix(r, m);
+	return r;
 }
 
 matrix *identityMatrix(int order){
@@ -43,74 +59,67 @@ matrix *identityMatrix(int order){
 	return im;
 }
 
-matrix *fillMatrix(matrix *m, long double n){
-	matrix *r = newMatrix(m->rows, m->cols);
-	for(int i = 0; i < r->rows; ++i){
-		for(int j = 0; j < r->cols; ++j){
-			r->data[i][j] = n;
+void fillMatrix(matrix *m, long double n){
+	for(int i = 0; i < m->rows; ++i){
+		for(int j = 0; j < m->cols; ++j){
+			m->data[i][j] = n;
 		}
 	}
-	return r;
 }
 
-matrix *addMatrix(matrix *m, long double n){
-	matrix *r = newMatrix(m->cols, m->rows);
-	for(int i = 0; i < r->rows; ++i){
-		for(int j = 0; j < r->cols; ++j){
-			r->data[i][j] = m->data[i][j] + n;
+void addMatrix(matrix *m, long double n){
+	for(int i = 0; i < m->rows; ++i){
+		for(int j = 0; j < m->cols; ++j){
+			m->data[i][j] += n;
 		}
 	}
-	return r;
 }
 
-matrix *subtractMatrix(matrix *m, long double n){
-	return addMatrix(m, -n);
+void subtractMatrix(matrix *m, long double n){
+	addMatrix(m, -n);
 }
 
-matrix *multiplyMatrix(matrix *m, long double n){
-	matrix *r = copyMatrix(m);
-	for(int i = 0; i < r->rows; ++i){
-		for(int j = 0; j < r->cols; ++j){
-			r->data[i][j] *= n;
+void multiplyMatrix(matrix *m, long double n){
+	for(int i = 0; i < m->rows; ++i){
+		for(int j = 0; j < m->cols; ++j){
+			m->data[i][j] *= n;
 		}
 	}
-	return r;
 }
 
-static inline bool sameDimensions(matrix *m1, matrix *m2){
-	return (m1->rows == m2->rows) && (m1->cols == m2->cols);
-}
-
-matrix *addMatrices(matrix *m1, matrix *m2){
-	if(!sameDimensions(m1, m2)){
-		fprintf(stderr, "Wrong dimensions (%dx%d != %dx%d)\n", m1->rows, m1->cols, m2->rows, m2->cols);
+matrix *addMatrices(matrix *a, matrix *b){
+	if(!sameDimensions(a, b)){
+		fprintf(stderr, "Wrong dimensions (%dx%d != %dx%d)\n", a->rows, a->cols, b->rows, b->cols);
 		return NULL;
 	}
-	matrix *r = newMatrix(m1->rows, m1->cols);
-	for(int i = 0; i < m1->rows; ++i){
-		for(int j = 0; j < m1->cols; ++j){
-			r->data[i][j] = m1->data[i][j] + m2->data[i][j];
+	matrix *r = newMatrix(a->rows, a->cols);
+	for(int i = 0; i < r->rows; ++i){
+		for(int j = 0; j < r->cols; ++j){
+			r->data[i][j] = a->data[i][j] + b->data[i][j];
 		}
 	}
 	return r;
 }
 
-matrix *subtractMatrices(matrix *m1, matrix *m2){
-	m2 = multiplyMatrix(m2, (long double)-1);
-	return addMatrices(m1, m2);
+matrix *subtractMatrices(matrix *a, matrix *b){
+	matrix *t = cloneMatrix(b);
+	multiplyMatrix(t, -1);
+	matrix *r = addMatrices(a, t);
+	freeMatrix(&t);
+	return r;
 }
 
-matrix *multiplyMatrices(matrix *m1, matrix *m2){
-	if(m1->cols != m2->rows){
-		fprintf(stderr, "Wrong dimensions (%dx%d != %dx%d)\n", m1->rows, m1->cols, m2->rows, m2->cols);
+matrix *multiplyMatrices(matrix *a, matrix *b){
+	if(a->cols != b->rows){
+		fprintf(stderr, "Wrong dimensions (%dx%d != %dx%d)\n", a->rows, a->cols, b->rows, b->cols);
 		return NULL;
 	}
-	matrix *r = newMatrix(m1->rows, m2->cols);
+	matrix *r = newMatrix(a->rows, b->cols);
 	for(int i = 0; i < r->rows; ++i){
 		for(int j = 0; j < r->cols; ++j){
 			long double sum = 0;
-			for(int n = 0; n < m1->cols; ++n){
-				sum += m1->data[i][n] * m2->data[n][j];
+			for(int n = 0; n < a->cols; ++n){
+				sum += a->data[i][n] * b->data[n][j];
 			}
 			r->data[i][j] = sum;
 		}
@@ -118,22 +127,18 @@ matrix *multiplyMatrices(matrix *m1, matrix *m2){
 	return r; 
 }
 
-matrix *HadamardProduct(matrix *m1, matrix *m2){
-	if(!sameDimensions(m1, m2)){
-		fprintf(stderr, "Wrong dimensions (%dx%d != %dx%d)\n", m1->rows, m1->cols, m2->rows, m2->cols);
+matrix *HadamardProduct(matrix *a, matrix *b){
+	if(!sameDimensions(a, b)){
+		fprintf(stderr, "Wrong dimensions (%dx%d != %dx%d)\n", a->rows, a->cols, b->rows, b->cols);
 		return NULL;
 	}
-	matrix *r = newMatrix(m1->rows, m1->cols);
+	matrix *r = newMatrix(a->rows, a->cols);
 	for(int i = 0; i < r->rows; ++i){
 		for(int j = 0; j < r->cols; ++j){
-			r->data[i][j] = m1->data[i][j] * m2->data[i][j];
+			r->data[i][j] = a->data[i][j] * b->data[i][j];
 		}
 	}
 	return r;
-}
-
-static inline bool isSquare(matrix *m){
-	return m->rows == m->cols;
 }
 
 matrix *subMatrix(matrix *m, int row, int col){
@@ -164,6 +169,7 @@ long double determinant(matrix *m){
 		for(int i = 0; i < m->rows; ++i){
 			matrix *s = subMatrix(m, 0, i);
 			long double v = determinant(s)*m->data[0][i];
+			freeMatrix(&s);
 			d += !(i%2) ? v : -v;
 		}
 		return d;
@@ -178,8 +184,10 @@ matrix *cofactor(matrix *m){
 	matrix *r = newMatrix(m->rows, m->cols);
 	for(int i = 0; i < r->rows; ++i){
 		for(int j = 0; j < r->cols; ++j){
-			long double v = determinant(subMatrix(m, i, j));
-			r->data[i][j] = !((i+j)%2) ? v : -v;
+			matrix *s = subMatrix(m, i, j);
+			long double ds = determinant(s);
+			freeMatrix(&s);
+			r->data[i][j] = !((i+j)%2) ? ds : -ds;
 		}
 	}
 	return r;
@@ -195,37 +203,49 @@ matrix *transpose(matrix *m){
 	return r;
 }
 
-matrix *dotProduct(matrix *m1, matrix *m2){
-	return multiplyMatrices(m1, transpose(m2));
+matrix *dotProduct(matrix *a, matrix *b){
+	matrix *tb = transpose(b);
+	matrix *r = multiplyMatrices(a, tb);
+	freeMatrix(&tb);
+	return r;
 }
 
 matrix *adjugate(matrix *m){
-	return transpose(cofactor(m));
+	matrix *cm = cofactor(m);
+	matrix *r = transpose(cm);
+	freeMatrix(&cm);
+	return r;
 }
 
-matrix *inverse(matrix *m){
+void invert(matrix *m){
 	long double d = determinant(m);
 	if(d == 0){
 		fprintf(stderr, "Determinant is 0, the matrix is not invertible\n");
-		return NULL;
+		return;
 	}
-	return multiplyMatrix(adjugate(m), 1/d);
+	matrix *r = adjugate(m);
+	multiplyMatrix(r, 1/d);
+	copyMatrix(m, r);
+	freeMatrix(&r);
 }
 
-matrix *raiseMatrix(matrix *m, int n){
+void raiseMatrix(matrix *m, int n){
 	if(!isSquare(m)){
 		fprintf(stderr, "Matrix is not square (%dx%d)\n", m->rows, m->cols);
-		return NULL;
+		return;
 	}
 	if(n < 0){
-		m = inverse(m);
+		invert(m);
 		n = -n;
 	}
 	matrix *r = identityMatrix(m->rows);
 	for(int i = 0; i < n; ++i){
-		r = multiplyMatrices(r, m);
+		matrix *t = multiplyMatrices(r, m);
+		copyMatrix(r, t);
+		freeMatrix(&t);
 	}
-	return r;
+	copyMatrix(m, r);
+	freeMatrix(&r);
 }
 
 
@@ -242,17 +262,17 @@ matrix *raiseMatrix(matrix *m, int n){
 	
 	printf("done\n");
 	
-	matrix *in = newMatrix(1, 2); in->data[0][0] = 0; in->data[0][1] = 1;
-	matrix *layer = newMatrix(1, 2); layer->data[0][0] = 0.188; layer->data[0][1] = 0.812;
-	matrix *layerm = newMatrix(1, 2); layerm->data[0][0] = 0.812; layerm->data[0][1] = 0.188;
+	matrix in = newMatrix(1, 2); in.data[0][0] = 0; in.data[0][1] = 1;
+	matrix layer = newMatrix(1, 2); layer.data[0][0] = 0.188; layer.data[0][1] = 0.812;
+	matrix layerm = newMatrix(1, 2); layerm.data[0][0] = 0.812; layerm.data[0][1] = 0.188;
 	
-	matrix *diff = subtractMatrices(in, layer);
-	matrix *der = HadamardProduct(layer, layerm);
-	matrix *res = HadamardProduct(diff, der);
+	matrix diff = subtractMatrices(in, layer);
+	matrix der = HadamardProduct(layer, layerm);
+	matrix res = HadamardProduct(diff, der);
 	
-	for(int i = 0; i < res->rows; ++i){
-		for(int j = 0; j < res->cols; ++j){
-			printf("%.3Lf\t", res->data[i][j]);
+	for(int i = 0; i < res.rows; ++i){
+		for(int j = 0; j < res.cols; ++j){
+			printf("%.3Lf\t", res.data[i][j]);
 		}
 		printf("\n");
 	}
