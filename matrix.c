@@ -176,7 +176,7 @@ long double determinant(matrix *m){
 	}
 }
 
-matrix *cofactor(matrix *m){
+void cofactor(matrix *m){
 	if(!isSquare(m)){
 		fprintf(stderr, "Matrix is not square (%dx%d)\n", m->rows, m->cols);
 		return NULL;
@@ -190,7 +190,8 @@ matrix *cofactor(matrix *m){
 			r->data[i][j] = !((i+j)%2) ? ds : -ds;
 		}
 	}
-	return r;
+	copyMatrix(m, r);
+	freeMatrix(&r);
 }
 
 matrix *transpose(matrix *m){
@@ -210,11 +211,11 @@ matrix *dotProduct(matrix *a, matrix *b){
 	return r;
 }
 
-matrix *adjugate(matrix *m){
-	matrix *cm = cofactor(m);
-	matrix *r = transpose(cm);
-	freeMatrix(&cm);
-	return r;
+void adjugate(matrix *m){
+	cofactor(m);
+	matrix *t = transpose(cm);
+	copyMatrix(m, t);
+	freeMatrix(&t);
 }
 
 void invert(matrix *m){
@@ -223,10 +224,8 @@ void invert(matrix *m){
 		fprintf(stderr, "Determinant is 0, the matrix is not invertible\n");
 		return;
 	}
-	matrix *r = adjugate(m);
-	multiplyMatrix(r, 1/d);
-	copyMatrix(m, r);
-	freeMatrix(&r);
+	adjugate(m);
+	multiplyMatrix(m, 1/d);
 }
 
 void raiseMatrix(matrix *m, int n){

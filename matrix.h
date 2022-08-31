@@ -45,13 +45,13 @@ matrix *subMatrix(matrix *m, int row, int col);
 
 long double determinant(matrix *m);
 
-matrix *cofactor(matrix *m);
+void cofactor(matrix *m);
 
 matrix *transpose(matrix *m);
 
 matrix *dotProduct(matrix *a, matrix *b);
 
-matrix *adjugate(matrix *m);
+void adjugate(matrix *m);
 
 void invert(matrix *m);
 
