@@ -23,6 +23,45 @@ void freeMatrix(matrix **m){
 	*m = NULL;
 }
 
+void saveMatrix(matrix *m, FILE *fp){
+	char header = 'M';
+	fwrite(&header, sizeof(char), 1, fp);
+	fwrite(&m->rows, sizeof(int), 1, fp);
+	fwrite(&m->cols, sizeof(int), 1, fp);
+	for(int i = 0; i < m->rows; ++i){
+		fwrite(m->data[i], sizeof(long double), m->cols, fp);
+	}
+	char end = 'E';
+	fwrite(&end, sizeof(char), 1, fp);
+}
+
+matrix *loadMatrix(FILE *fp){
+	char header;
+	fread(&header, sizeof(char), 1, fp);
+	if(header != 'M'){
+		fprintf(stderr, "Header is '%c' not 'M'\n", header);
+		exit(EXIT_FAILURE);
+	}
+	int rows, cols;
+	fread(&rows, sizeof(int), 1, fp);
+	fread(&cols, sizeof(int), 1, fp);
+	matrix *m = malloc(sizeof(matrix));
+	m->rows = rows;
+	m->cols = cols;
+	m->data = malloc(rows*sizeof(long double*));
+	for(int i = 0; i < m->rows; ++i){
+		m->data[i] = malloc(cols*sizeof(long double));
+		fread(m->data[i], sizeof(long double), cols, fp);
+	}
+	char end;
+	fread(&end, sizeof(char), 1, fp);
+	if(end != 'E'){
+		fprintf(stderr, "End is '%c' not 'E'\n", end);
+		exit(EXIT_FAILURE);
+	}
+	return m;
+}
+
 static inline bool sameDimensions(matrix *a, matrix *b){
 	return (a->rows == b->rows) && (a->cols == b->cols);
 }
@@ -34,7 +73,7 @@ static inline bool isSquare(matrix *m){
 void copyMatrix(matrix *dest, matrix *src){
 	if(!sameDimensions(dest, src)){
 		fprintf(stderr, "Wrong dimensions (%dx%d != %dx%d)\n", dest->rows, dest->cols, src->rows, src->cols);
-		return;
+		exit(EXIT_FAILURE);
 	}
 	for(int i = 0; i < src->rows; ++i){
 		for(int j = 0; j < src->cols; ++j){
@@ -90,7 +129,7 @@ void multiplyMatrix(matrix *m, long double n){
 matrix *addMatrices(matrix *a, matrix *b){
 	if(!sameDimensions(a, b)){
 		fprintf(stderr, "Wrong dimensions (%dx%d != %dx%d)\n", a->rows, a->cols, b->rows, b->cols);
-		return NULL;
+		exit(EXIT_FAILURE);
 	}
 	matrix *r = newMatrix(a->rows, a->cols);
 	for(int i = 0; i < r->rows; ++i){
@@ -112,7 +151,7 @@ matrix *subtractMatrices(matrix *a, matrix *b){
 matrix *multiplyMatrices(matrix *a, matrix *b){
 	if(a->cols != b->rows){
 		fprintf(stderr, "Wrong dimensions (%dx%d != %dx%d)\n", a->rows, a->cols, b->rows, b->cols);
-		return NULL;
+		exit(EXIT_FAILURE);
 	}
 	matrix *r = newMatrix(a->rows, b->cols);
 	for(int i = 0; i < r->rows; ++i){
@@ -130,7 +169,7 @@ matrix *multiplyMatrices(matrix *a, matrix *b){
 matrix *HadamardProduct(matrix *a, matrix *b){
 	if(!sameDimensions(a, b)){
 		fprintf(stderr, "Wrong dimensions (%dx%d != %dx%d)\n", a->rows, a->cols, b->rows, b->cols);
-		return NULL;
+		exit(EXIT_FAILURE);
 	}
 	matrix *r = newMatrix(a->rows, a->cols);
 	for(int i = 0; i < r->rows; ++i){
@@ -179,7 +218,7 @@ long double determinant(matrix *m){
 void cofactor(matrix *m){
 	if(!isSquare(m)){
 		fprintf(stderr, "Matrix is not square (%dx%d)\n", m->rows, m->cols);
-		return;
+		exit(EXIT_FAILURE);
 	}
 	matrix *r = newMatrix(m->rows, m->cols);
 	for(int i = 0; i < r->rows; ++i){
@@ -222,7 +261,7 @@ void invert(matrix *m){
 	long double d = determinant(m);
 	if(d == 0){
 		fprintf(stderr, "Determinant is 0, the matrix is not invertible\n");
-		return;
+		exit(EXIT_FAILURE);
 	}
 	adjugate(m);
 	multiplyMatrix(m, 1/d);
@@ -231,7 +270,7 @@ void invert(matrix *m){
 void raiseMatrix(matrix *m, int n){
 	if(!isSquare(m)){
 		fprintf(stderr, "Matrix is not square (%dx%d)\n", m->rows, m->cols);
-		return;
+		exit(EXIT_FAILURE);
 	}
 	if(n < 0){
 		invert(m);

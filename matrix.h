@@ -19,6 +19,10 @@ matrix *newMatrix(int rows, int cols);
 
 void freeMatrix(matrix **m);
 
+void saveMatrix(matrix *m, FILE *fp);
+
+matrix *loadMatrix(FILE *fp);
+
 void copyMatrix(matrix *dest, matrix *src);
 
 matrix *cloneMatrix(matrix *m);
